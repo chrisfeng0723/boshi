@@ -9,11 +9,9 @@ package main
 
 import (
 	"boshi/ReadFile"
-	"boshi/utils"
+	"boshi/WriteExcel"
 	"fmt"
-	"github.com/spf13/cast"
 	"io/ioutil"
-	"sort"
 )
 
 const PATH = "./txt.data"
@@ -24,25 +22,14 @@ func main() {
 	ResultSlice := make([]ReadFile.Content, 0)
 	files, _ := ioutil.ReadDir(PATH)
 	for _, f := range files {
-		//fmt.Println("正在处理"+f.Name())
+		fmt.Println("正在处理"+f.Name())
 		Line, Column, Result := ReadFile.ReadFile(PATH + "/" + f.Name())
 		LineSlice = append(LineSlice, Line)
 		ColumnSlice = append(ColumnSlice, Column...)
 		ResultSlice = append(ResultSlice, Result...)
 
 	}
-	//获取所有的行并排序转成Map
-	sort.Ints(LineSlice)
-	LineMap := utils.SliceToMap(LineSlice)
-	//过滤掉重复的内容
-	FilterColumnSlice :=utils.RemoveDuplicateElement(ColumnSlice)
-	fmt.Println(FilterColumnSlice)
-	sort.Ints(FilterColumnSlice)
-	ColumnMap := utils.SliceToMap(FilterColumnSlice)
-	//获取所有的可能出现的数据
-	fmt.Println(LineMap, ColumnMap,len(ResultSlice))
-	fmt.Print(" "," ")
-	for _,lval := range LineSlice{
-		fmt.Print("c"+cast.ToString(lval),"  ")
-	}
+	//one step
+	WriteExcel.GatherData(LineSlice,ColumnSlice,ResultSlice)
+
 }

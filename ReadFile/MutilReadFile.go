@@ -37,12 +37,12 @@ func GetLineContent(fileName string, number int) ([]Content, []int) {
 		return []Content{}, []int{}
 	}
 	defer file.Close()
-	stat, err := file.Stat()
-	if err != nil {
-		panic(err)
-	}
-	var size = stat.Size()
-	fmt.Println("file size=", size)
+	//stat, err := file.Stat()
+	//if err != nil {
+	//	panic(err)
+	//}
+	//var size = stat.Size()
+	//fmt.Println("file size=", size)
 	buf := bufio.NewReader(file)
 	//1.去除#开头的注释
 	//2.获取每列的内容
