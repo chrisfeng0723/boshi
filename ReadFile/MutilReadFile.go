@@ -8,6 +8,7 @@
 package ReadFile
 
 import (
+	"boshi/utils"
 	"bufio"
 	"fmt"
 	"github.com/spf13/cast"
@@ -23,7 +24,7 @@ type Content struct {
 }
 
 func ReadFile(fileName string) (Line int, Column []int, Result []Content) {
-	Line = cast.ToInt(GetFileNumber(fileName))
+	Line = cast.ToInt(utils.GetFileNumber(fileName))
 	Result,Column = GetLineContent(fileName, Line)
 	return
 }

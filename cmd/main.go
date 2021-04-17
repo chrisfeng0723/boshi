@@ -9,14 +9,14 @@ package main
 
 import (
 	"boshi/ReadFile"
-	"boshi/WriteExcel"
+	"boshi/utils"
 	"fmt"
-	"io/ioutil"
 )
 
 const PATH = "./txt.data"
 
 func main() {
+	/**
 	LineSlice := make([]int, 0)
 	ColumnSlice := make([]int, 0)
 	ResultSlice := make([]ReadFile.Content, 0)
@@ -31,5 +31,13 @@ func main() {
 	}
 	//one step
 	WriteExcel.GatherData(LineSlice,ColumnSlice,ResultSlice)
+	*/
+
+	heads :=ReadFile.GetAllHeats("allheats.txt")
+	//fmt.Println(heads)
+	result :=utils.SortMapByKey(heads)
+	for _,val:=range result{
+		fmt.Println(heads[val],val)
+	}
 
 }
