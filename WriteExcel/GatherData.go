@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-func  GatherData(LineSlice []int,ColumnSlice []int,ResultSlice []ReadFile.Content){
+func  GatherData(LineSlice []int,ColumnSlice []int,ResultSlice []ReadFile.Content) (fileName string){
 	//获取所有的行并排序转成Map
 	sort.Ints(LineSlice)
 	LineMap := utils.SliceToMap(LineSlice)
@@ -55,8 +55,48 @@ func  GatherData(LineSlice []int,ColumnSlice []int,ResultSlice []ReadFile.Conten
 	// Set active sheet of the workbook.
 	f.SetActiveSheet(index)
 	// Save spreadsheet by the given path.
-	fileName := time.Now().Format("20060102150405")
-	if err := f.SaveAs(fileName+".xlsx"); err != nil {
+	fileName = time.Now().Format("20060102150405")+".xlsx"
+	if err := f.SaveAs(fileName); err != nil {
 		fmt.Println(err)
 	}
+	return fileName
+}
+
+func CalcAllHeats(fileName string,Content map[float64]int,SortValue []float64){
+	f, err := excelize.OpenFile(fileName)
+	defer f.Save()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	index := f.NewSheet("Sheet2")
+	start :=1
+	totalLine :=len(Content)
+	sumLine :=cast.ToString(totalLine+1)
+	for _,val := range SortValue{
+		CurrentLine := cast.ToString(start)
+		f.SetCellValue("Sheet2", "A"+CurrentLine,Content[val])
+		Column2 :="B"+CurrentLine
+		f.SetCellValue("Sheet2",Column2,val)
+		formula3 :=	Column2+"-B1"
+		f.SetCellFormula("Sheet2","C"+CurrentLine,formula3)
+		formula4 :=	"C"+CurrentLine+"*627.5"
+		f.SetCellFormula("Sheet2","D"+CurrentLine,formula4)
+		formula5 :=	"-D"+CurrentLine+"/(0.0019858955*298.15)"
+		f.SetCellFormula("Sheet2","E"+CurrentLine,formula5)
+		formula6 :=	"EXP(E"+CurrentLine+")"
+		f.SetCellFormula("Sheet2","F"+CurrentLine,formula6)
+		formula7 :=	"F"+CurrentLine+"/"+"F"+sumLine
+		f.SetCellFormula("Sheet2","G"+CurrentLine,formula7)
+		start++
+
+	}
+
+	sumFormula := fmt.Sprintf("SUM(F1:%s)","F"+cast.ToString(totalLine))
+	f.SetCellFormula("Sheet2","F"+sumLine,sumFormula)
+	f.SetActiveSheet(index)
+	if err := f.Save(); err != nil {
+		fmt.Println(err)
+	}
+
 }

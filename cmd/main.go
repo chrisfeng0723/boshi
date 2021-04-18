@@ -9,6 +9,7 @@ package main
 
 import (
 	"boshi/ReadFile"
+	"boshi/WriteExcel"
 	"boshi/utils"
 	"fmt"
 )
@@ -39,5 +40,7 @@ func main() {
 	for _,val:=range result{
 		fmt.Println(heads[val],val)
 	}
+	fileName :="temp.xlsx"
+	WriteExcel.CalcAllHeats(fileName,heads,result)
 
 }
