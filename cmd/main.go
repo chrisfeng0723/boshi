@@ -12,12 +12,14 @@ import (
 	"boshi/WriteExcel"
 	"boshi/utils"
 	"fmt"
+	"io/ioutil"
+	"sort"
 )
 
 const PATH = "./txt.data"
 
 func main() {
-	/**
+
 	LineSlice := make([]int, 0)
 	ColumnSlice := make([]int, 0)
 	ResultSlice := make([]ReadFile.Content, 0)
@@ -30,17 +32,33 @@ func main() {
 		ResultSlice = append(ResultSlice, Result...)
 
 	}
+	sort.Ints(LineSlice)
+	//fmt.Println(LineSlice)
+	FilterColumnSlice :=utils.RemoveDuplicateElement(ColumnSlice)
+	sort.Ints(FilterColumnSlice)
 	//one step
-	WriteExcel.GatherData(LineSlice,ColumnSlice,ResultSlice)
-	*/
+	fileName :=WriteExcel.GatherData(LineSlice,FilterColumnSlice,ResultSlice)
 
+
+
+	//step two
 	heads :=ReadFile.GetAllHeats("allheats.txt")
 	//fmt.Println(heads)
 	result :=utils.SortMapByKey(heads)
-	for _,val:=range result{
-		fmt.Println(heads[val],val)
-	}
-	fileName :="temp.xlsx"
-	WriteExcel.CalcAllHeats(fileName,heads,result)
+	//for _,val:=range result{
+	//	fmt.Println(heads[val],val)
+	//}
+
+	sumCoefficient :=WriteExcel.CalcAllHeats(fileName,heads,result)
+	//fmt.Println(sumCoefficient)
+
+	//step three
+
+
+	WriteExcel.CalcFinalWeigth(fileName,sumCoefficient,FilterColumnSlice,LineSlice)
+
+
+
+
 
 }

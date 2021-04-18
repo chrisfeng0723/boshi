@@ -13,18 +13,17 @@ import (
 	"fmt"
 	"github.com/360EntSecGroup-Skylar/excelize/v2"
 	"github.com/spf13/cast"
-	"sort"
+	"strings"
 	"time"
 )
 
 func  GatherData(LineSlice []int,ColumnSlice []int,ResultSlice []ReadFile.Content) (fileName string){
 	//获取所有的行并排序转成Map
-	sort.Ints(LineSlice)
+
 	LineMap := utils.SliceToMap(LineSlice)
 	//过滤掉重复的内容
-	FilterColumnSlice :=utils.RemoveDuplicateElement(ColumnSlice)
-	sort.Ints(FilterColumnSlice)
-	ColumnMap := utils.SliceToMap(FilterColumnSlice)
+
+	ColumnMap := utils.SliceToMap(ColumnSlice)
 	//获取所有的可能出现的数据
 
 
@@ -62,7 +61,7 @@ func  GatherData(LineSlice []int,ColumnSlice []int,ResultSlice []ReadFile.Conten
 	return fileName
 }
 
-func CalcAllHeats(fileName string,Content map[float64]int,SortValue []float64){
+func CalcAllHeats(fileName string,Content map[float64]int,SortValue []float64)(numberLocation map[int]string){
 	f, err := excelize.OpenFile(fileName)
 	defer f.Save()
 	if err != nil {
@@ -73,8 +72,10 @@ func CalcAllHeats(fileName string,Content map[float64]int,SortValue []float64){
 	start :=1
 	totalLine :=len(Content)
 	sumLine :=cast.ToString(totalLine+1)
+	numberLocation = make(map[int]string,len(SortValue))
 	for _,val := range SortValue{
 		CurrentLine := cast.ToString(start)
+
 		f.SetCellValue("Sheet2", "A"+CurrentLine,Content[val])
 		Column2 :="B"+CurrentLine
 		f.SetCellValue("Sheet2",Column2,val)
@@ -88,6 +89,8 @@ func CalcAllHeats(fileName string,Content map[float64]int,SortValue []float64){
 		f.SetCellFormula("Sheet2","F"+CurrentLine,formula6)
 		formula7 :=	"F"+CurrentLine+"/"+"F"+sumLine
 		f.SetCellFormula("Sheet2","G"+CurrentLine,formula7)
+
+		numberLocation[Content[val]] = "G"+CurrentLine
 		start++
 
 	}
@@ -98,5 +101,40 @@ func CalcAllHeats(fileName string,Content map[float64]int,SortValue []float64){
 	if err := f.Save(); err != nil {
 		fmt.Println(err)
 	}
+	return
+
+}
+
+func CalcFinalWeigth(fileName string,sumCoefficient map[int]string,columnSlice []int,LineSlice []int){
+	f, err := excelize.OpenFile(fileName)
+	defer f.Save()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	lenLine := len(columnSlice)
+	lenColumn := len(LineSlice)
+	index := f.NewSheet("Sheet2")
+
+	for i:=0;i<lenLine;i++{
+		//var sumFormula string
+		sumFormulaSlice := make([]string,0)
+		for key,val :=range LineSlice{
+			location :=utils.TransferNumber(key+2,i+3)
+			temp :=fmt.Sprintf("%s*Sheet2!%s",location,sumCoefficient[val])
+			sumFormulaSlice = append(sumFormulaSlice,temp)
+		}
+		//fmt.Println(strings.Join(sumFormulaSlice,","))
+		//fmt.Println("----------")
+		resultFormula :=fmt.Sprintf("SUM(%s)",strings.Join(sumFormulaSlice,","))
+		resultLocation :=utils.TransferNumber(lenColumn+2,i+3)
+		f.SetCellFormula("Sheet1",resultLocation,resultFormula)
+	}
+
+	f.SetActiveSheet(index)
+	if err := f.Save(); err != nil {
+		fmt.Println(err)
+	}
+	return
 
 }
